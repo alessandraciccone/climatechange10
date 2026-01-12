@@ -1,4 +1,4 @@
-package aciccone.climatechange10;
+package aciccone.climatechange10.repository;
 
 import aciccone.climatechange10.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
