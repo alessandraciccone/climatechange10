@@ -1,0 +1,13 @@
+package aciccone.climatechange10;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Climatechange10Application {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Climatechange10Application.class, args);
+	}
+
+}
