@@ -9,10 +9,11 @@
         <module name="climatechange10" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel target="21" />
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="climatechange10" options="-parameters" />
+      <module name="climatechange10" options="-parameters -Xlint:-preview" />
     </option>
   </component>
 </project>

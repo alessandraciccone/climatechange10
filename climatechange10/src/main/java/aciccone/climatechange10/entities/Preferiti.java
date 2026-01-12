@@ -43,7 +43,7 @@ public class Preferiti {
         return imglink;
     }
 
-    public void setiImglink(String imglink) {
+    public void setImglink(String imglink) {
         imglink = imglink;
     }
 
