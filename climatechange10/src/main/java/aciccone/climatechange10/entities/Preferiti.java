@@ -6,17 +6,18 @@ import jakarta.persistence.*;
 @Table(name = "preferiti")
 public class Preferiti {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Meglio IDENTITY per PostgreSQL/MySQL
     private long id;
     private String titolo;
     private String descrizione;
     private String imglink;
 
     public Preferiti(){};
+
     public Preferiti(String titolo, String descrizione, String imglink) {
         this.titolo = titolo;
         this.descrizione = descrizione;
-        imglink = imglink;
+        this.imglink = imglink; // FIX: era "imglink = imglink"
     }
 
     public long getId() {
@@ -43,8 +44,8 @@ public class Preferiti {
         return imglink;
     }
 
-    public void setiImglink(String imglink) {
-        imglink = imglink;
+    public void setImglink(String imglink) { // FIX: era "setiImglink" e "imglink = imglink"
+        this.imglink = imglink;
     }
 
     @Override

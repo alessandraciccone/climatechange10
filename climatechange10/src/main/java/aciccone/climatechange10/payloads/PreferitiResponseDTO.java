@@ -4,6 +4,5 @@ public record PreferitiResponseDTO(
         Long id,
         String titolo,
         String descrizione,
-        String Imglink
-) {
-}
+        String imglink // tutto minuscolo per uniformità
+) { }
