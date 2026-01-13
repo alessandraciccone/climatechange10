@@ -5,6 +5,8 @@ import aciccone.climatechange10.security.JWTTool;
 import aciccone.climatechange10.service.AuthService;
 import aciccone.climatechange10.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,6 +23,7 @@ public class UserController {
         this.jwtTool = jwtTool;
     }
 
+
     @PostMapping("/auth/register")
     public ResponseEntity<UserResponseDTO> register(@RequestBody AuthRequestDTO dto) {
         UserResponseDTO userResponse = authService.register(dto);
@@ -30,9 +33,25 @@ public class UserController {
     public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginRequestDTO dto) {
         UserResponseDTO userResponse = authService.login(dto.email(), dto.password());
         String token = jwtTool.generateToken(userResponse.email());
-        return ResponseEntity.ok(new AuthResponseDTO(userResponse, token));
+
+        // Passa l'ID come primo parametro
+        return ResponseEntity.ok(new AuthResponseDTO(
+                userResponse.id(),  // <- Aggiungi l'ID qui
+                userResponse,
+                token
+        ));
     }
 
+    @GetMapping("/users/{id}")
+    @PreAuthorize("isAuthenticated()") // Cambia da hasRole('USER') a isAuthenticated()
+    public ResponseEntity<UserResponseDTO> getById(@PathVariable Long id) {
+        System.out.println("===== GET USER BY ID =====");
+        System.out.println("ID richiesto: " + id);
+        System.out.println("Authentication: " + SecurityContextHolder.getContext().getAuthentication());
+
+        UserResponseDTO userResponse = userService.getById(id);
+        return ResponseEntity.ok(userResponse);
+    }
 
     @PutMapping("/users/{id}")
     public ResponseEntity<UserResponseDTO> update(

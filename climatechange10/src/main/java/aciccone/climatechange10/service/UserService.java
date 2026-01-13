@@ -47,7 +47,7 @@ public class UserService implements UserDetailsService {
     }
 
     // GET BY ID
-    public UserResponseDTO findById(Long id){
+    public UserResponseDTO getById(Long id){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Utente con id " + id + " non è stato trovato"));
         return toResponse(user);
