@@ -1,60 +1,95 @@
 package aciccone.climatechange10.service;
 
 import aciccone.climatechange10.entities.Preferiti;
+import aciccone.climatechange10.entities.User;
 import aciccone.climatechange10.exception.NotFoundException;
 import aciccone.climatechange10.payloads.PreferitiDTO;
+import aciccone.climatechange10.payloads.PreferitiResponseDTO;
 import aciccone.climatechange10.repository.PreferitiRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import aciccone.climatechange10.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class PreferitiService {
 
-    @Autowired
-    private PreferitiRepository preferitiRepository;
+    private final PreferitiRepository preferitiRepository;
+    private final UserRepository userRepository;
 
-    // GET ALL - Ottieni tutti i preferiti
-    public List<Preferiti> getAllPreferiti() {
-        return preferitiRepository.findAll();
+    public PreferitiService(
+            PreferitiRepository preferitiRepository,
+            UserRepository userRepository
+    ) {
+        this.preferitiRepository = preferitiRepository;
+        this.userRepository = userRepository;
     }
 
-    // GET BY ID - Ottieni un preferito per ID
-    public Preferiti getPreferitoById(Long id) {
-        return preferitiRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Preferito con id " + id + " non trovato"));
+    /* =========================
+       GET ALL (per utente)
+       ========================= */
+    public List<PreferitiResponseDTO> getAllByUser(String email) {
+        User user = getUserByEmail(email);
+
+        return preferitiRepository.findByUser(user)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    // GET BY TITOLO - Ottieni preferiti per titolo
-    public List<Preferiti> getPreferitiByTitolo(String titolo) {
-        return preferitiRepository.findByTitolo(titolo);
+    /* =========================
+       CREATE
+       ========================= */
+    public PreferitiResponseDTO createPreferito(PreferitiDTO dto, String email) {
+        User user = getUserByEmail(email);
+
+        // Evita duplicati (opzionale ma consigliato)
+        if (preferitiRepository.existsByTitoloAndUser(dto.titolo(), user)) {
+            throw new IllegalArgumentException("Preferito già esistente");
+        }
+
+        Preferiti preferito = new Preferiti();
+        preferito.setTitolo(dto.titolo());
+        preferito.setDescrizione(dto.descrizione());
+        preferito.setImglink(dto.imglink());
+        preferito.setUser(user);
+
+        Preferiti saved = preferitiRepository.save(preferito);
+        return toResponse(saved);
     }
 
-    // POST - Crea un nuovo preferito
-    public Preferiti createPreferito(PreferitiDTO body) {
-        Preferiti newPreferito = new Preferiti(
-                body.titolo(),
-                body.descrizione(),
-                body.imglink()
+    /* =========================
+       DELETE (sicuro)
+       ========================= */
+    public void deletePreferito(Long id, String email) {
+        User user = getUserByEmail(email);
+
+        Preferiti preferito = preferitiRepository.findByIdAndUser(id, user)
+                .orElseThrow(() ->
+                        new NotFoundException("Preferito non trovato o non autorizzato")
+                );
+
+        preferitiRepository.delete(preferito);
+    }
+
+    /* =========================
+       UTILS
+       ========================= */
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new NotFoundException("Utente con email " + email + " non trovato")
+                );
+    }
+
+    private PreferitiResponseDTO toResponse(Preferiti p) {
+        return new PreferitiResponseDTO(
+                p.getId(),
+                p.getTitolo(),
+                p.getDescrizione(),
+                p.getImglink()
         );
-        return preferitiRepository.save(newPreferito);
-    }
-
-    // PUT - Aggiorna un preferito esistente
-    public Preferiti updatePreferito(Long id, PreferitiDTO body) {
-        Preferiti found = this.getPreferitoById(id);
-
-        found.setTitolo(body.titolo());
-        found.setDescrizione(body.descrizione());
-        found.setImglink(body.imglink());
-
-        return preferitiRepository.save(found);
-    }
-
-    // DELETE - Elimina un preferito
-    public void deletePreferito(Long id) {
-        Preferiti found = this.getPreferitoById(id);
-        preferitiRepository.delete(found);
     }
 }

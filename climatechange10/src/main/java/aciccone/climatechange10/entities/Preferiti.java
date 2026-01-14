@@ -1,60 +1,74 @@
 package aciccone.climatechange10.entities;
 
+import aciccone.climatechange10.entities.User;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "preferiti")
 public class Preferiti {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Meglio IDENTITY per PostgreSQL/MySQL
-    private long id;
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "preferiti_seq"
+    )
+    @SequenceGenerator(
+            name = "preferiti_seq",
+            sequenceName = "preferiti_seq",
+            allocationSize = 1
+    )
+    private Long id;
+
+    @Column(nullable = false)
     private String titolo;
+
+    @Column(length = 1000)
     private String descrizione;
+
     private String imglink;
 
-    public Preferiti(){};
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    public Preferiti(String titolo, String descrizione, String imglink) {
+    public Preferiti() {
+    }
+
+    public Preferiti(Long id, String titolo, String descrizione, String imglink, User user) {
+        this.id = id;
         this.titolo = titolo;
         this.descrizione = descrizione;
-        this.imglink = imglink; // FIX: era "imglink = imglink"
+        this.imglink = imglink;
+        this.user = user;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
-
     public String getTitolo() {
         return titolo;
     }
-
     public void setTitolo(String titolo) {
         this.titolo = titolo;
     }
-
     public String getDescrizione() {
         return descrizione;
+
     }
 
     public void setDescrizione(String descrizione) {
         this.descrizione = descrizione;
     }
-
     public String getImglink() {
         return imglink;
     }
-
-    public void setImglink(String imglink) { // FIX: era "setiImglink" e "imglink = imglink"
+    public void setImglink(String imglink) {
         this.imglink = imglink;
     }
-
-    @Override
-    public String toString() {
-        return "Preferiti{" +
-                "id=" + id +
-                ", titolo='" + titolo + '\'' +
-                ", descrizione='" + descrizione + '\'' +
-                ", imglink='" + imglink + '\'' +
-                '}';
+    public User getUser() {
+        return user;}
+    public void setUser(User user) {
+        this.user = user;
     }
+    
 }
